@@ -3,11 +3,7 @@ import iris
 import matplotlib.pyplot as plt
 import iris.plot as iplt
 import iris.quickplot as qplt
-
-root = '/group_workspaces/jasmin2/ukca/ptg21/xlpzb/xlpzba.pm'
-months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
-years = ['2000']
-
+import definitions_STASH
 sec34_stashes = {
     101:'nuc_mode_sol number',
     102:"nuc mode",
@@ -30,21 +26,31 @@ sec34_stashes = {
     121:"Ait mode insol OC",
     126:"Nuc mode sol OC",
     126:"Ait mode sol SS",
-    157:"Aerosol surface area",
+    157:"Aerosol_SA",
     159:"O3 column",
     160:"N2O5 het rate",
     161:"HO2 self het rate",
     001:"O3 MMR"
     }
 sec35_stashes = {001:'o3 on p levels'}
+root = '/group_workspaces/jasmin2/ukca/ptg21/xlpzb/xlpzba.pm'
+months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
+years = ['2006','2007','2008','2009']
 
+stash_index=157
+# create an array of filenames to be read in
 filenames = []
 for yvar in range (0, len(years)):
   for ivar in range(0,len(months)):
-    filenames = np.append(filenames, iris.sample_data_path(root + years[yvar] + months[ivar] + '.pp'))
-
-stash_index=157
-aerosol_sa=iris.load(filenames, iris.AttributeConstraint(STASH = 'm01'+'s34i'+str(stash_index))
-iris.fileformats.netcdf.save(aerosol_sa, 'test_sa.nc')
-
+    filename = iris.sample_data_path(root + years[yvar] + months[ivar] + '.pp')
+    # extract stash items to netcdf files
+    stash_indexes=[157]
+    out_file = filename[0:-3]+'_'+sec34_stashes[stash_index]+'.nc'
+    print sec34_stashes[stash_index], filename, out_file
+    print ('read in data')
+    out_data=iris.load(filename,
+      iris.AttributeConstraint(STASH = 'm01'+'s34i'+str(stash_index)),
+      callback=definitions_STASH.UKCA_callback)
+    print ('read out data')
+    iris.fileformats.netcdf.save(out_data, out_file)
 
